@@ -168,6 +168,30 @@ function alternate() {
 	}
 }
 
+// 'butnot' is a parser combinator that takes two parsers, 'p1' and 'p2'. 
+// It returns a parser that succeeds if 'p1' matches and 'p2' does not, or
+// 'p1' matches and the matched text is longer that p2's.
+// Useful for things like: butnot(IdentifierName, ReservedWord)
+function butnot(p1,p2) {
+	var p1 = toParser(p1);
+	var p2 = toParser(p2);
+
+	// match a but not b. if both match and b's matched text is shorter
+        // than a's, a failed match is made
+	return function(input) {
+		var br = p2(input);
+		if(!br) {
+			return p1(input);
+		} else {
+			var ar = p1(input);
+			if(ar.matched.length > br.matched.length)
+				return ar;
+			else
+				return false;
+		}
+	}
+}
+
 // 'difference' is a parser combinator that takes two parsers, 'p1' and 'p2'. 
 // It returns a parser that succeeds if 'p1' matches and 'p2' does not. If
 // both match then if p2's matched text is shorter than p1's it is successfull.
@@ -254,7 +278,6 @@ function repeat1(p) {
 // matches zero or one matches of the original parser.
 function optional(p) {
 	var p = toParser(p);
-
 	return function(input) {
 		var r = p(input);
 		return r || make_result(input, "", false);				
