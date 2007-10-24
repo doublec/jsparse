@@ -105,6 +105,12 @@ function action(p, f) {
 	}
 }
 
+// Given a parser that produces an array as an ast, returns a
+// parser that produces an ast with the array joined by a separator.
+function join_action(p, sep) {
+    return action(p, function(ast) { return ast.join(sep); });
+}
+
 // 'negate' will negate a single character parser. So given 'ch("a")' it will successfully
 // parse any character except for 'a'. Or 'negate(range("a", "z"))' will successfully parse
 // anything except the lowercase characters a-z.
