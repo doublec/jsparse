@@ -82,6 +82,15 @@ function toParser(p) {
 	return (typeof(p) == "string") ? token(p) : p;
 }
 
+// Parsers combinator that returns a parser that
+// skips whitespace before applying parser.
+function whitespace(p) {
+    return function(input) {
+	var input = input.replace(/^\s+/,"");
+	return toParser(p)(input);
+    }
+}
+
 // Parser combinator that passes the AST generated from the parser 'p' 
 // to the function 'f'. The result of 'f' is used as the AST in the result.
 function action(p, f) {
@@ -148,6 +157,15 @@ function sequence() {
 		}
 		return make_result(input, matched, ast);
 	}
+}
+
+// Like sequence, but ignores whitespace between individual parsers.
+function wsequence() {
+    var parsers = [];
+    for(var i=0; i < arguments.length; ++i) {
+	parsers.push(whitespace(arguments[i]));
+    }
+    return sequence.apply(null, parsers);       
 }
 
 // 'alternate' is a parser combinator that provides a choice between other parsers.
