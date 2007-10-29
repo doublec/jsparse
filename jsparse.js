@@ -341,6 +341,15 @@ function list(p, s) {
 	return chain(p, s, function(ast) { return ast[1]; });
 }
 
+// Like list, but ignores whitespace between individual parsers.
+function wlist() {
+    var parsers = [];
+    for(var i=0; i < arguments.length; ++i) {
+	parsers.push(whitespace(arguments[i]));
+    }
+    return list.apply(null, parsers);       
+}
+
 // A parser that always returns a zero length match
 function epsilon_p(input) {
 	return make_result(input, "", undefined);
