@@ -48,7 +48,7 @@ function token(s) {
 			return { remaining: input.substring(s.length), matched: s, ast: s };
 		else
 			return false;
-	}
+	};
 }
 
 // Like 'token' but for a single character. Returns a parser that given a string
@@ -85,9 +85,10 @@ function toParser(p) {
 // Parsers combinator that returns a parser that
 // skips whitespace before applying parser.
 function whitespace(p) {
+    var p = toParser(p);
     return function(input) {
 	var input = input.replace(/^\s+/,"");
-	return toParser(p)(input);
+	return p(input);
     }
 }
 
@@ -143,12 +144,14 @@ function nothing_p(input) {
 // It can take any number of arguments, each one being a parser. The parser that 'sequence'
 // returns succeeds if all the parsers in the sequence succeeds. It fails if any of them fail.
 function sequence() {
-	var parsers = arguments;
+	var parsers = [];
+	for(var i = 0; i < arguments.length; ++i) 
+	    parsers.push(toParser(arguments[i]));	    
 	return function(input) {
 		var ast = [];
 		var matched = "";
 		for(var i=0; i< parsers.length; ++i) {
-			var parser = toParser(parsers[i]);	
+			var parser = parsers[i];	
 			var result = parser(input);
 			if(result) {
 				input = result.remaining;
@@ -169,7 +172,7 @@ function sequence() {
 function wsequence() {
     var parsers = [];
     for(var i=0; i < arguments.length; ++i) {
-	parsers.push(whitespace(arguments[i]));
+	parsers.push(whitespace(toParser(arguments[i])));
     }
     return sequence.apply(null, parsers);       
 }
@@ -179,10 +182,12 @@ function wsequence() {
 // each of the given parsers in order. The first one that succeeds results in a 
 // successfull parse. It fails if all parsers fail.
 function alternate() {
-	var parsers = arguments;
+	var parsers = [];
+	for(var i = 0; i < arguments.length; ++i) 
+	    parsers.push(toParser(arguments[i]));	    
 	return function(input) {
 		for(var i=0; i< parsers.length; ++i) {
-			var parser=toParser(parsers[i]);
+			var parser=parsers[i];
 			var result = parser(input);
 			if(result) {
 				return result;
