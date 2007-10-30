@@ -312,11 +312,11 @@ function wsequence() {
     return sequence.apply(null, parsers);       
 }
 
-// 'alternate' is a parser combinator that provides a choice between other parsers.
+// 'choice' is a parser combinator that provides a choice between other parsers.
 // It takes any number of parsers as arguments and returns a parser that will try
 // each of the given parsers in order. The first one that succeeds results in a 
 // successfull parse. It fails if all parsers fail.
-function alternate() {
+function choice() {
     var parsers = [];
     for(var i = 0; i < arguments.length; ++i) 
 	parsers.push(toParser(arguments[i]));	    
