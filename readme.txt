@@ -1,9 +1,11 @@
 jsparse
 =======
 
-This is a simple library of parser combinators for Javascript. It is a
-mix of ideas from various parser combinator libraries written in other
-languages (Haskell, Clean, C++). 
+This is a simple library of parser combinators for Javascript based on
+Packrat parsers [1] and Parsing expression grammars [2]. 
+
+[1] http://pdos.csail.mit.edu/~baford/packrat/
+[2] http://en.wikipedia.org/wiki/Parsing_expression_grammar
 
 The only documentation currently available in this blog entry:
 
