@@ -514,7 +514,9 @@ function optional(p) {
 }
 
 // A parser combinator that ensures that the given parser succeeds but
-// ignores its result
+// ignores its result. This can be useful for parsing literals that you
+// don't want to appear in the ast. eg:
+// sequence(expect("("), Number, expect(")")) => ast: Number
 function expect(p) {
     return action(p, function(ast) { return undefined; });
 }
@@ -576,11 +578,14 @@ function semantic(f) {
     }
 }
 
-// Similar to semantic, a syntactic predicate asserts that a certain conditional
+// The and predicate asserts that a certain conditional
 // syntax is satisfied before evaluating another production. Eg:
 // sequence(syntactic("0"), oct_p)
 // (if a leading zero, then parse octal)
-function syntactic(p) {
+// It succeeds if 'p' succeeds and fails if 'p' fails. It never 
+// consume any input however, and doesn't put anything in the resulting
+// AST.
+function and(p) {
     var p = toParser(p);
     var pid = parser_id++;
     return function(state) {
@@ -589,6 +594,34 @@ function syntactic(p) {
 	if(cached)
 	    return cached;       
 	cached = p(state) ? make_result(state, "", undefined) : false;
+	savedState.putCached(pid, cached);
+	return cached;
+    }
+}
+			
+// The opposite of 'and'. It fails if 'p' succeeds and succeeds if
+// 'p' fails. It never consumes any input. This combined with 'and' can
+// be used for 'lookahead' and disambiguation of cases.
+//
+// Compare:
+// sequence("a",choice("+","++"),"b")
+//   parses a+b
+//   but not a++b because the + matches the first part and peg's don't
+//   backtrack to other choice options if they succeed but later things fail.
+//
+// sequence("a",choice(sequence("+", not("+")),"++"),"b")
+//    parses a+b
+//    parses a++b
+//
+function not(p) {
+    var p = toParser(p);
+    var pid = parser_id++;
+    return function(state) {
+	var savedState = state;
+	var cached = savedState.getCached(pid);
+	if(cached)
+	    return cached;       
+	cached = p(state) ? false : make_result(state, "", undefined);
 	savedState.putCached(pid, cached);
 	return cached;
     }
