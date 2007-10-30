@@ -21,39 +21,20 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-var zero = action("0", function(ast) { return 0; });
-var decimal_digit = action(range("0", "9"), function(ast) { return parseInt(ast); });
-var non_zero_digit = action(range("1", "9"), function(ast) { return parseInt(ast); });
-var decimal_digits = repeat1(decimal_digit); 
-var decimal_integer_literal = choice(zero, sequence(non_zero_digit, optional(decimal_digits)));
-var signed_integer = choice(decimal_digits, sequence("+", decimal_digits), sequence("-", decimal_digits));
-var exponent_indicator = choice("e", "E");
-var exponent_part = sequence(exponent_indicator, signed_integer);
-var decimal_literal = choice(sequence(decimal_integer_literal, ".", optional(decimal_digits), optional(exponent_part)),
-				sequence(".", decimal_digits, optional(exponent_part)),
-				sequence(decimal_integer_literal, optional(exponent_part)));
 
-var hex_digit = choice(range("0", "9"), range("a", "f"), range("A", "F"));
-var hex_integer_literal = sequence(choice("0x", "0X"), repeat1(hex_digit));
+// From http://en.wikipedia.org/wiki/Parsing_expression_grammar
+//
+// Value   := [0-9]+ / '(' Expr ')'
+// Product := Value (('*' / '/') Value)*
+// Sum     := Product (('+' / '-') Product)*
+// Expr    := Sum 
+//
+// Forward definitions required due to lack of laziness in JS 
+var Expr = function(state) { return Expr(state); }
 
-var numeric_literal = choice(hex_integer_literal, decimal_literal);
+var Value = choice(repeat1(range('0','9')), Expr);
+var Product = sequence(Value, repeat0(sequence(choice('*', '/'), Value)));
+var Sum = sequence(Product, repeat0(sequence(choice('+', '-'), Product)));
+var Expr = Sum;
 
-var single_escape_character = choice("'", "\"", "\\", "b", "f", "n", "r", "t", "v");
-var non_escape_character = negate(single_escape_character);
-var character_escape_sequence = choice(single_escape_character, non_escape_character);
-var hex_escape_sequence = sequence("x", hex_digit, hex_digit);
-var unicode_escape_sequence = sequence("u", hex_digit, hex_digit, hex_digit, hex_digit);
-var escape_sequence = choice(hex_escape_sequence, unicode_escape_sequence, character_escape_sequence);
-var single_string_character = choice(negate(choice("\'", "\\", "\r", "\n")),
-					sequence("\\", escape_sequence));
-var double_string_character = choice(negate(choice("\"", "\\", "\r", "\n")),
-					sequence("\\", escape_sequence));
-var single_string_characters = repeat1(single_string_character);
-var double_string_characters = repeat1(double_string_character);
-var string_literal = choice(sequence("\"", optional(double_string_characters), "\""),
-			       sequence("'", optional(single_string_characters), "'"));
-			       
-var null_literal = token("null");
-var boolean_literal = choice("true", "false");
-
-var literal = choice(null_literal, boolean_literal, numeric_literal, string_literal);					       
+// Usage: Expr(ps("1+2*3-4"))

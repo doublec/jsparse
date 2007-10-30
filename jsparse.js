@@ -221,6 +221,29 @@ function join_action(p, sep) {
     return action(p, function(ast) { return ast.join(sep); });
 }
 
+// Given an ast of the form [ Expression, [ a, b, ...] ], convert to
+// [ [ [ Expression [ a ] ] b ] ... ]
+// This is used for handling left recursive entries in the grammar. e.g.
+// MemberExpression:
+//   PrimaryExpression
+//   FunctionExpression
+//   MemberExpression [ Expression ]
+//   MemberExpression . Identifier
+//   new MemberExpression Arguments 
+function left_factor(ast) {
+    return foldl(function(v, action) { 
+		     return [ v, action ]; 
+		 }, 
+		 ast[0], 
+		 ast[1]);
+}
+
+// Return a parser that left factors the ast result of the original
+// parser.
+function left_factor_action(p) {
+    return action(p, left_factor);
+}
+
 // 'negate' will negate a single character parser. So given 'ch("a")' it will successfully
 // parse any character except for 'a'. Or 'negate(range("a", "z"))' will successfully parse
 // anything except the lowercase characters a-z.
