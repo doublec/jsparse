@@ -580,7 +580,7 @@ function semantic(f) {
 
 // The and predicate asserts that a certain conditional
 // syntax is satisfied before evaluating another production. Eg:
-// sequence(syntactic("0"), oct_p)
+// sequence(and("0"), oct_p)
 // (if a leading zero, then parse octal)
 // It succeeds if 'p' succeeds and fails if 'p' fails. It never 
 // consume any input however, and doesn't put anything in the resulting
@@ -593,7 +593,8 @@ function and(p) {
 	var cached = savedState.getCached(pid);
 	if(cached)
 	    return cached;       
-	cached = p(state) ? make_result(state, "", undefined) : false;
+	var r = p(state);
+	cached = r ? make_result(state, "", undefined) : false;
 	savedState.putCached(pid, cached);
 	return cached;
     }
