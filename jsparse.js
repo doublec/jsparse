@@ -59,7 +59,7 @@ ParseState.prototype.trimLeft = function() {
 }
 
 ParseState.prototype.at = function(index) {
-    return this.input[this.index + index];
+    return this.input.charAt(this.index + index);
 }
 
 ParseState.prototype.toString = function() {
