@@ -21,9 +21,6 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-function identity(x) {
-    return x;
-}
 
 function foldl(f, initial, seq) {
     for(var i=0; i< seq.length; ++i)
