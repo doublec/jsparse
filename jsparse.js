@@ -407,7 +407,7 @@ function difference(p1,p2) {
     // match a but not b. if both match and b's matched text is shorter
     // than a's, a successfull match is made
     return function(state) {
-        var savedState = sate;
+        var savedState = state;
         var cached = savedState.getCached(pid);
         if(cached)
             return cached;
