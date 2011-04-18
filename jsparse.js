@@ -386,10 +386,16 @@ function butnot(p1,p2) {
             cached = p1(state);
         } else {
             var ar = p1(state);
-            if(ar.matched.length > br.matched.length)
-                cached = ar;
-            else
-                cached = false;
+
+            if (ar) {
+              if(ar.matched.length > br.matched.length)
+                  cached = ar;
+              else
+                  cached = false;
+            }
+            else {
+              cached = false;
+            }
         }
         savedState.putCached(pid, cached);
         return cached;

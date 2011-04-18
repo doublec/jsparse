@@ -204,7 +204,13 @@ function ParserTests() {
     assertParseMatched("sequence('a',choice('+','++'),'b')", "a+b", "a+b");
     assertParseFailed("sequence('a',choice('+','++'),'b')", "a++b");
     assertParseMatched("sequence('a',choice(sequence('+',not('+')),'++'),'b')", "a+b", "a+b");
-    assertParseMatched("sequence('a',choice(sequence('+',not('+')),'++'),'b')", "a++b", "a++b");        
+    assertParseMatched("sequence('a',choice(sequence('+',not('+')),'++'),'b')", "a++b", "a++b");
+    
+    // butnot
+    assertFullyParsed("butnot(range('0','9'), '6')", "1");
+    assertParseFailed("butnot(range('0','9'), '6')", "6");
+    assertParseFailed("butnot(range('0','9'), 'x')", "x");
+    assertParseFailed("butnot(range('0','9'), 'y')", "x");
 }
 
 
